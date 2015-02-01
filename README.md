@@ -13,7 +13,7 @@ License: MIT
 Usage
 -----
 
-    ./s3backup.rb job backup_job_s3_key, aws_bucket, aws_region, aws_profile
+    ./s3backup.rb job backup_job_s3_key aws_bucket aws_region aws_profile
 
 Example:
 
