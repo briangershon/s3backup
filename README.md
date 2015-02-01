@@ -1,4 +1,5 @@
-#s3backup
+s3backup
+========
 
 A simple folder backup solution to AWS S3.
 
@@ -9,10 +10,12 @@ Author: Brian Gershon
 
 License: MIT
 
-Usage:
+Usage
+-----
+
     ./s3backup.rb job backup_job_s3_key, aws_bucket, aws_region, aws_profile
 
-Example
+Example:
 
     ./s3backup.rb job laptop_backup_job.yml my-bucket us-west-2 brian
 
