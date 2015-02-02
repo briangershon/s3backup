@@ -16,18 +16,16 @@ License: MIT
 Usage
 -----
 
-    s3backup.rb job backup_job_s3_key aws_bucket aws_region aws_profile
+    s3backup.rb job backup_job_s3_key aws_bucket aws_profile
 
 Example:
 
-    s3backup.rb job laptop_backup_job.yml my-bucket us-west-2 brian
+    s3backup.rb job laptop_backup_job.yml my-bucket brian
 
 Description
 -----------
 
 `aws_bucket` is a string like `my-s3-bucket`
-
-`aws_region` is a string like `us-west-2`
 
 `aws_profile` is a profile name in `~/.aws/credentials` See [Setting up AWS Credentials](http://docs.aws.amazon.com/AWSSdkDocsRuby/latest/DeveloperGuide/set-up-creds.html)
 

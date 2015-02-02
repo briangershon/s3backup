@@ -6,10 +6,10 @@ require 'yaml'
 require_relative 'lib/backup_file_to_s3'
 require_relative 'lib/files_for_backup'
 
-def run_backup_job(backup_job_s3_key, aws_bucket, aws_region, aws_profile)
+def run_backup_job(backup_job_s3_key, aws_bucket, aws_profile)
   @aws_bucket = aws_bucket
 
-  Aws.config[:region] = aws_region
+  Aws.config[:region] = 'us-east-1'   # this is required but doesn't matter for S3
   Aws.config[:profile] = aws_profile
   s3_client = Aws::S3::Client.new
 
@@ -55,12 +55,10 @@ def run_backup_job(backup_job_s3_key, aws_bucket, aws_region, aws_profile)
 end
 
 class BackupToS3 < Thor
-  desc "job backup_job_s3_key aws_bucket aws_region aws_profile", "run a backup"
+  desc "job backup_job_s3_key aws_bucket aws_profile", "run a backup"
   long_desc <<-LONGDESC
 
   aws_bucket is a string like `my-s3-bucket`
-
-  aws_region is a string like `us-west-2`
 
   aws_profile is a profile name in ~/.aws/credentials
 
@@ -68,8 +66,8 @@ class BackupToS3 < Thor
 
   See README.md for more details.
   LONGDESC
-  def job(backup_job_s3_key, aws_bucket, aws_region, aws_profile)
-    run_backup_job(backup_job_s3_key, aws_bucket, aws_region, aws_profile)
+  def job(backup_job_s3_key, aws_bucket, aws_profile)
+    run_backup_job(backup_job_s3_key, aws_bucket, aws_profile)
   end
 end
 
