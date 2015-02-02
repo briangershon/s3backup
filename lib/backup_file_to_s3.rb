@@ -39,7 +39,7 @@ class BackupFileToS3
   end
 
   def upload_file(file_path, s3_key)
-    print "\nUploading #{file_path.basename}..."
+    print "\nUploading #{file_path} to #{s3_key}..."
     file_open = File.read(file_path)
     @s3_client.put_object(body: file_open, bucket: @aws_bucket, key: s3_key, metadata: { "modified-date" => file_path.mtime.tv_sec.to_s })
 

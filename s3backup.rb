@@ -3,6 +3,7 @@
 require 'thor'
 require 'aws-sdk-core'
 require 'yaml'
+require 'pathname'
 require_relative 'lib/backup_file_to_s3'
 require_relative 'lib/files_for_backup'
 
@@ -44,7 +45,7 @@ def run_backup_job(backup_job_s3_key, aws_bucket, aws_profile)
         @backup_service.upload_file pn, key.to_s
       end
     end
-    if index % 10000 == 0
+    if index % 100 == 0
       puts "\n#{files_count - index} files left to check."
     end
   end

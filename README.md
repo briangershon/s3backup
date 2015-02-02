@@ -47,5 +47,7 @@ backup_folder_excludes:
 `backup_folder` is the absolute path of the folder you want to backup, recursively.
 
 `backup_base_path` is the part that is stripped off the beginning to determine the S3 key.
+If you don't want to strip anything off, you must include just a `/` (forward slash),
+you can't leave it blank.
 
 `backup_folder_excludes` is an array of absolute paths to exclude from the backup_folder.
