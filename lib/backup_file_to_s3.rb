@@ -24,7 +24,7 @@ class BackupFileToS3
       else
         resp = @s3_client.head_object(bucket: @aws_bucket, key: s3_key)
         s3_file_size = resp.content_length
-        s3_file_modified_time = resp.last_modified.tv_sec
+        s3_file_modified_time = resp.last_modified
         update_metadata_cache(file_path, s3_key, s3_file_size, s3_file_modified_time)
       end
 
@@ -46,7 +46,7 @@ class BackupFileToS3
     # update cache
     resp = @s3_client.head_object(bucket: @aws_bucket, key: s3_key)
     s3_file_size = resp.content_length
-    s3_file_modified_time = resp.last_modified.tv_sec
+    s3_file_modified_time = resp.last_modified
     update_metadata_cache(file_path, s3_key, s3_file_size, s3_file_modified_time)
 
     puts " done."
@@ -74,7 +74,7 @@ class BackupFileToS3
     if @s3_cache
       @s3_cache[s3_key] = {
         size: size,
-        modified_time: last_modified,
+        modified_time: last_modified.tv_sec,
         cached_on: Time.now.tv_sec,
         file_path: file_path,
         s3_key: s3_key,

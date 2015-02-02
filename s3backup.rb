@@ -8,6 +8,7 @@ require_relative 'lib/backup_file_to_s3'
 require_relative 'lib/files_for_backup'
 
 def run_backup_job(backup_job_s3_key, aws_bucket, aws_profile)
+  @start_time = Time.now
   @aws_bucket = aws_bucket
 
   Aws.config[:region] = 'us-east-1'   # this is required but doesn't matter for S3
@@ -34,7 +35,7 @@ def run_backup_job(backup_job_s3_key, aws_bucket, aws_profile)
   @all_files = FilesForBackup.new(@backup_folder, @backup_folder_excludes).files
   files_count = @all_files.count
 
-  puts "#{files_count} files found."
+  puts "#{files_count} files found. Total elapsed time: #{Time.now - @start_time} seconds."
   puts "Backing up to S3://#{@aws_bucket}/#{Pathname(@backup_folder).relative_path_from(Pathname(@backup_base_path))}"
 
   @all_files.each_with_index do |file, index|
@@ -46,13 +47,13 @@ def run_backup_job(backup_job_s3_key, aws_bucket, aws_profile)
       end
     end
     if index % 100 == 0
-      puts "\n#{files_count - index} files left to check."
+      puts "#{files_count - index} files left to check. Total elapsed time: #{Time.now - @start_time} seconds."
     end
   end
 
   s3_cache.close
 
-  puts "\nFinished."
+  puts "\nFinished. Total elapsed time: #{Time.now - @start_time} seconds."
 end
 
 class BackupToS3 < Thor
