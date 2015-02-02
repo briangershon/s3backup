@@ -38,8 +38,8 @@ class BackupFileToS3
     end
   end
 
-  def upload_file(file_path, s3_key)
-    print "\nUploading #{file_path} to #{s3_key}..."
+  def upload_file(file_path, s3_key, logger=nil)
+    logger.info "Uploading #{file_path} to #{s3_key}..." unless logger.nil?
     file_open = File.read(file_path)
     @s3_client.put_object(body: file_open, bucket: @aws_bucket, key: s3_key, metadata: { "modified-date" => file_path.mtime.tv_sec.to_s })
 
@@ -49,7 +49,7 @@ class BackupFileToS3
     s3_file_modified_time = resp.last_modified
     update_metadata_cache(file_path, s3_key, s3_file_size, s3_file_modified_time)
 
-    puts " done."
+    logger.info "#{file_path.basename} complete." unless logger.nil?
   end
 
   # caching
