@@ -5,19 +5,31 @@ class FilesForBackup
   end
 
   def files(logger=nil)
-    all_files = Dir.glob(@backup_folder)
+    # warn if some folder doesn't exist
     @backup_folder_excludes.each do |folder_exclude|
-      if Pathname(folder_exclude).exist?
-        logger.info "Excluding paths that start with #{folder_exclude}" unless logger.nil?
-        all_files.each do |file|
-          if file.start_with?(folder_exclude)
-            all_files.delete(file)
-          end
-        end
-      else
+      unless Pathname(folder_exclude).exist?
         logger.error "ALERT: #{folder_exclude} exclude path not found." unless logger.nil?
       end
     end
-    all_files
+
+    all_files = remove_excludes(Dir.glob(@backup_folder), logger)
+  end
+
+  def remove_excludes(all_files, logger=nil)
+    logger.info "Excluding paths..." unless logger.nil?
+    new_file_list = []
+    all_files.each do |file|
+      exclude = false
+      @backup_folder_excludes.each do |folder_exclude|
+        if file.start_with?(folder_exclude)
+          exclude = true
+          break
+        end
+      end
+      unless exclude
+        new_file_list.push(file)
+      end
+    end
+    new_file_list
   end
 end
