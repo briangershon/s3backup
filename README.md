@@ -27,9 +27,15 @@ Description
 
 `aws_bucket` is a string like `my-s3-bucket`
 
-`aws_profile` is a profile name in `~/.aws/credentials` See [Setting up AWS Credentials](http://docs.aws.amazon.com/AWSSdkDocsRuby/latest/DeveloperGuide/set-up-creds.html)
+`aws_profile` is a profile name in `~/.aws/credentials`
+See [Setting up AWS Credentials](http://docs.aws.amazon.com/AWSSdkDocsRuby/latest/DeveloperGuide/set-up-creds.html)
 
-`backup_job_s3_key` is the name (s3_key) of a YAML file in aws_bucket that looks like this:
+`backup_job_s3_key` is the name (s3_key) of a YAML file in aws_bucket.
+See below for file format.
+
+Note that the list of files is cached in a local "`#{backup_job_s3_key}`.cache.db" to avoid slow
+building of this file for large directories. Just delete this file to rebuild
+the cache if your `backup_job_s3_key` file changes.
 
 Job Configuration (YAML file)
 -----------------------------

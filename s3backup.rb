@@ -8,6 +8,8 @@ require 'logger'
 require_relative 'lib/backup_file_to_s3'
 require_relative 'lib/files_for_backup'
 
+ALLFILES_CACHE_KEY = 'allfiles'
+
 def run_backup_job(backup_job_s3_key, aws_bucket, aws_profile)
   @aws_bucket = aws_bucket
 
@@ -18,7 +20,7 @@ def run_backup_job(backup_job_s3_key, aws_bucket, aws_profile)
   Aws.config[:profile] = aws_profile
   s3_client = Aws::S3::Client.new
 
-  s3_cache = GDBM.new("s3_metadata_cache.db")
+  s3_cache = GDBM.new("s3_metadata.cache.db")
 
   @logger.info("Started")
   @backup_service = BackupFileToS3.new(s3_client, @aws_bucket, s3_cache)
@@ -27,7 +29,7 @@ def run_backup_job(backup_job_s3_key, aws_bucket, aws_profile)
     @logger.info "Bringing down '#{backup_job_s3_key}' configuration file from S3."
     @backup_job = YAML.load(@backup_service.grab_backup_job(backup_job_s3_key))
   rescue Aws::S3::Errors::NoSuchKey
-    @logger.info "Backup Job '#{backup_job_s3_key}' not found. Exiting."
+    @logger.error "Backup Job '#{backup_job_s3_key}' not found. Exiting."
     abort
   end
 
@@ -36,7 +38,16 @@ def run_backup_job(backup_job_s3_key, aws_bucket, aws_profile)
   @backup_folder_excludes = @backup_job['backup_folder_excludes']
 
   @logger.info "Getting list of local files from #{@backup_folder}."
-  @all_files = FilesForBackup.new(@backup_folder, @backup_folder_excludes).files(@logger)
+  cache_file_name = "#{backup_job_s3_key}.cache.db"
+  file_list_cache = GDBM.new(cache_file_name)
+  if file_list_cache.has_key?(ALLFILES_CACHE_KEY)
+    @all_files = JSON.parse(file_list_cache[ALLFILES_CACHE_KEY])
+    @logger.info "Retrieved list of files from '#{cache_file_name}' cache."
+  else
+    @all_files = FilesForBackup.new(@backup_folder, @backup_folder_excludes).files(@logger)
+    file_list_cache[ALLFILES_CACHE_KEY] = @all_files.to_json
+    @logger.info "Saved list of files to '#{cache_file_name}' cache."
+  end
   files_count = @all_files.count
 
   @logger.info "#{files_count} files found."
