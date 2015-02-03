@@ -34,7 +34,7 @@ See [Setting up AWS Credentials](http://docs.aws.amazon.com/AWSSdkDocsRuby/lates
 See below for file format.
 
 Until a backup job fully completes, the list of files are cached in a local
-"`#{backup_job_s3_key}`.cache.db" to avoid slow rebuilding of this file for large
+"`#{backup_job_s3_key}`.cache.json" to avoid slow rebuilding of this file for large
 directories. Just delete this file to rebuild the cache, otherwise it is
 automatically deleted when the backup completes.
 

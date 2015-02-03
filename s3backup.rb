@@ -8,8 +8,6 @@ require 'logger'
 require_relative 'lib/backup_file_to_s3'
 require_relative 'lib/files_for_backup'
 
-ALLFILES_CACHE_KEY = 'allfiles'
-
 def run_backup_job(backup_job_s3_key, aws_bucket, aws_profile)
   @aws_bucket = aws_bucket
 
@@ -38,24 +36,22 @@ def run_backup_job(backup_job_s3_key, aws_bucket, aws_profile)
   @backup_folder_excludes = @backup_job['backup_folder_excludes']
 
   @logger.info "Getting list of local files from #{@backup_folder}."
-  cache_file_name = "#{backup_job_s3_key}.cache.db"
-  file_list_cache = GDBM.new(cache_file_name)
-  if file_list_cache.has_key?(ALLFILES_CACHE_KEY)
-    @all_files = JSON.parse(file_list_cache[ALLFILES_CACHE_KEY])
-    @logger.info "Retrieved cached list of files from '#{cache_file_name}'."
+  all_files_cache = Pathname("#{backup_job_s3_key}.cache.json")
+  if all_files_cache.exist?
+    @all_files = JSON.parse(all_files_cache.read)
+    @logger.info "Retrieved cached list of files from '#{all_files_cache}'."
   else
     @all_files = FilesForBackup.new(@backup_folder, @backup_folder_excludes).files(@logger)
-    file_list_cache[ALLFILES_CACHE_KEY] = @all_files.to_json
-    @logger.info "Cached list of files to '#{cache_file_name}'."
+    all_files_cache.write(@all_files.to_json)
+    @logger.info "Cached list of files to '#{all_files_cache}'."
   end
-  file_list_cache.close
   files_count = @all_files.count
 
   @logger.info "#{files_count} files found."
   @logger.info "Backing up to S3://#{@aws_bucket}/#{Pathname(@backup_folder).relative_path_from(Pathname(@backup_base_path))}"
 
   @all_files.each_with_index do |file, index|
-    pn = Pathname.new(file)
+    pn = Pathname(file)
     if pn.file?
       key = pn.relative_path_from(Pathname(@backup_base_path))
       if @backup_service.file_needs_upload?(pn, key.to_s)
@@ -69,8 +65,8 @@ def run_backup_job(backup_job_s3_key, aws_bucket, aws_profile)
 
   s3_cache.close
 
-  Pathname(cache_file_name).delete if Pathname(cache_file_name).exist?
-  @logger.info "Deleted '#{cache_file_name}'."
+  all_files_cache.delete
+  @logger.info "Deleted '#{all_files_cache}'."
 
   @logger.info "Finished."
   @logger.close
