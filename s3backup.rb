@@ -42,12 +42,13 @@ def run_backup_job(backup_job_s3_key, aws_bucket, aws_profile)
   file_list_cache = GDBM.new(cache_file_name)
   if file_list_cache.has_key?(ALLFILES_CACHE_KEY)
     @all_files = JSON.parse(file_list_cache[ALLFILES_CACHE_KEY])
-    @logger.info "Retrieved list of files from '#{cache_file_name}' cache."
+    @logger.info "Retrieved cached list of files from '#{cache_file_name}'."
   else
     @all_files = FilesForBackup.new(@backup_folder, @backup_folder_excludes).files(@logger)
     file_list_cache[ALLFILES_CACHE_KEY] = @all_files.to_json
-    @logger.info "Saved list of files to '#{cache_file_name}' cache."
+    @logger.info "Cached list of files to '#{cache_file_name}'."
   end
+  file_list_cache.close
   files_count = @all_files.count
 
   @logger.info "#{files_count} files found."
@@ -67,6 +68,10 @@ def run_backup_job(backup_job_s3_key, aws_bucket, aws_profile)
   end
 
   s3_cache.close
+
+  Pathname(cache_file_name).delete if Pathname(cache_file_name).exist?
+  @logger.info "Deleted '#{cache_file_name}'."
+
   @logger.info "Finished."
   @logger.close
 end

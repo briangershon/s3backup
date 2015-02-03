@@ -33,9 +33,10 @@ See [Setting up AWS Credentials](http://docs.aws.amazon.com/AWSSdkDocsRuby/lates
 `backup_job_s3_key` is the name (s3_key) of a YAML file in aws_bucket.
 See below for file format.
 
-Note that the list of files is cached in a local "`#{backup_job_s3_key}`.cache.db" to avoid slow
-building of this file for large directories. Just delete this file to rebuild
-the cache if your `backup_job_s3_key` file changes.
+Until a backup job fully completes, the list of files are cached in a local
+"`#{backup_job_s3_key}`.cache.db" to avoid slow rebuilding of this file for large
+directories. Just delete this file to rebuild the cache, otherwise it is
+automatically deleted when the backup completes.
 
 Job Configuration (YAML file)
 -----------------------------
