@@ -42,7 +42,7 @@ class BackupFileToS3
 
   def upload_file(file_path, s3_key)
     file_size = Filesize.from(file_path.size.to_s + " B").pretty
-    @logger.info "Uploading #{file_path.basename} to #{s3_key}. Size: #{file_size}" unless @logger.nil?
+    @logger.info "Uploading #{file_path.basename} (#{file_size}) to #{s3_key}." unless @logger.nil?
     file_open = File.read(file_path)
     @s3_client.put_object(body: file_open, bucket: @aws_bucket, key: s3_key, metadata: { "modified-date" => file_path.mtime.tv_sec.to_s })
 
