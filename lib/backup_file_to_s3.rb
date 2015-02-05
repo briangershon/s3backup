@@ -1,5 +1,6 @@
 require 'aws-sdk-core'
 require 'gdbm'
+require 'filesize'
 
 class BackupFileToS3
   def initialize(s3_client=nil, aws_bucket=nil, gdbm=nil, logger=nil)
@@ -40,7 +41,8 @@ class BackupFileToS3
   end
 
   def upload_file(file_path, s3_key)
-    @logger.info "Uploading #{file_path} to #{s3_key}..." unless @logger.nil?
+    file_size = Filesize.from(file_path.size.to_s + " B").pretty
+    @logger.info "Uploading #{file_path.basename} to #{s3_key}. Size: #{file_size}" unless @logger.nil?
     file_open = File.read(file_path)
     @s3_client.put_object(body: file_open, bucket: @aws_bucket, key: s3_key, metadata: { "modified-date" => file_path.mtime.tv_sec.to_s })
 
