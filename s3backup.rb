@@ -55,7 +55,7 @@ def run_backup_job(backup_job_s3_key, aws_bucket, aws_profile)
     if pn.file?
       key = pn.relative_path_from(Pathname(@backup_base_path))
       if @backup_service.file_needs_upload?(pn, key.to_s)
-        @backup_service.upload_file pn, key.to_s, @logger
+        @backup_service.upload_file pn, key.to_s
       end
     end
     if index % 100 == 0
