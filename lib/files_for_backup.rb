@@ -1,3 +1,5 @@
+require 'find'
+
 class FilesForBackup
   def initialize(backup_folder, backup_folder_excludes)
     @backup_folder = backup_folder
@@ -12,7 +14,7 @@ class FilesForBackup
       end
     end
 
-    all_files = remove_excludes(Dir.glob(@backup_folder), logger)
+    all_files = remove_excludes(Find.find(@backup_folder).to_a, logger)
   end
 
   def remove_excludes(all_files, logger=nil)

@@ -45,7 +45,7 @@ Here is an example `laptop_backup_job.yml` job file:
 ```
 ---
 backup_base_path: /Volumes
-backup_folder: /Volumes/stuff/**/*
+backup_folder: /Volumes/stuff
 backup_folder_excludes:
 - /Volumes/stuff/Lib/
 - /Volumes/stuff/cache/
@@ -58,3 +58,4 @@ If you don't want to strip anything off, you must include just a `/` (forward sl
 you can't leave it blank.
 
 `backup_folder_excludes` is an array of absolute paths to exclude from the backup_folder.
+If you don't have any excludes just use this line: `backup_folder_excludes: []`.
