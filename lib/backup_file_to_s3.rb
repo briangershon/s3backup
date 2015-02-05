@@ -2,10 +2,11 @@ require 'aws-sdk-core'
 require 'gdbm'
 
 class BackupFileToS3
-  def initialize(s3_client=nil, aws_bucket=nil, gdbm=nil)
+  def initialize(s3_client=nil, aws_bucket=nil, gdbm=nil, logger=nil)
     @s3_client = s3_client
     @aws_bucket = aws_bucket
     @s3_cache = gdbm
+    @logger = logger
   end
 
   def grab_backup_job(s3_key)
@@ -38,8 +39,8 @@ class BackupFileToS3
     end
   end
 
-  def upload_file(file_path, s3_key, logger=nil)
-    logger.info "Uploading #{file_path} to #{s3_key}..." unless logger.nil?
+  def upload_file(file_path, s3_key)
+    @logger.info "Uploading #{file_path} to #{s3_key}..." unless @logger.nil?
     file_open = File.read(file_path)
     @s3_client.put_object(body: file_open, bucket: @aws_bucket, key: s3_key, metadata: { "modified-date" => file_path.mtime.tv_sec.to_s })
 
@@ -49,12 +50,17 @@ class BackupFileToS3
     s3_file_modified_time = resp.last_modified
     update_metadata_cache(file_path, s3_key, s3_file_size, s3_file_modified_time)
 
-    logger.info "#{file_path.basename} complete." unless logger.nil?
+    @logger.info "#{file_path.basename} complete." unless @logger.nil?
   end
 
   # caching
 
   def has_cached_metadata?(s3_key)
+    unless s3_key.ascii_only?
+      # BUG in GDBM: Value sometimes truncated when data has UTF-8
+      @logger.warn "Unable to cache non-ascii data, will retrieve metadata from S3 for #{s3_key}" unless @logger.nil?
+      return false
+    end
     if @s3_cache
       @s3_cache.has_key?(s3_key)
     else
@@ -71,6 +77,9 @@ class BackupFileToS3
   end
 
   def update_metadata_cache(file_path, s3_key, size, last_modified)
+    unless s3_key.ascii_only?
+      return
+    end
     if @s3_cache
       @s3_cache[s3_key] = {
         size: size,

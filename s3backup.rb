@@ -21,7 +21,7 @@ def run_backup_job(backup_job_s3_key, aws_bucket, aws_profile)
   s3_cache = GDBM.new("s3_metadata.cache.db")
 
   @logger.info("Started")
-  @backup_service = BackupFileToS3.new(s3_client, @aws_bucket, s3_cache)
+  @backup_service = BackupFileToS3.new(s3_client, @aws_bucket, s3_cache, @logger)
   begin
     backup_job_s3_key = backup_job_s3_key
     @logger.info "Bringing down '#{backup_job_s3_key}' configuration file from S3."
