@@ -60,6 +60,10 @@ class S3BucketList
     row_data
   end
 
+  def update_file(s3_key, size, last_modified)
+    @db.execute("UPDATE s3_bucket_list SET size = (?), last_modified = (?) where file_key = (?)", [size, last_modified, s3_key])
+  end
+
   def list_objects
     all_objects = []
     file_count = 0

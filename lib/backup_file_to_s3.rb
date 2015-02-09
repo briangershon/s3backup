@@ -38,8 +38,11 @@ class BackupFileToS3
     file_open = File.read(file_path)
     @s3_client.put_object(body: file_open, bucket: @aws_bucket, key: s3_key, metadata: { "modified-date" => file_path.mtime.tv_sec.to_s })
 
-    # TODO: Update cache!
-    
+    resp = @s3_client.head_object(bucket: @aws_bucket, key: s3_key)
+    s3_file_size = resp.content_length
+    s3_file_modified_time = resp.last_modified
+    @s3_cache.update_file(s3_key, s3_file_size, s3_file_modified_time.tv_sec)
+
     @logger.info "#{file_path.basename} complete." unless @logger.nil?
   end
 end
