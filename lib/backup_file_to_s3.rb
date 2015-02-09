@@ -1,5 +1,4 @@
 require 'aws-sdk-core'
-require 'sqlite3'
 require 'filesize'
 
 class BackupFileToS3

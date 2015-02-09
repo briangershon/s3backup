@@ -1,3 +1,5 @@
+require 'sqlite3'
+
 class S3BucketList
 
   CACHE_DATABASE_PATH = Pathname("s3_bucket_list.cache.db")
