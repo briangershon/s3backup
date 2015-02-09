@@ -23,7 +23,15 @@ class FilesForBackup
       end
     end
 
-    remove_excludes(files_only, logger)
+    all_files_minus_excludes = remove_excludes(files_only, logger)
+
+    # convert to Pathname
+    all_files = []
+    all_files_minus_excludes.each do |file|
+      all_files.push(Pathname(file))
+    end
+
+    all_files
   end
 
   def remove_excludes(all_files, logger=nil)

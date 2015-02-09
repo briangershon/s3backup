@@ -42,9 +42,14 @@ def run_backup_job(backup_job_s3_key, aws_bucket, aws_profile)
 
   @backup_service = BackupFileToS3.new(s3_client, @aws_bucket, s3_bucket_list, @logger)
 
-  all_files_to_backup.each do |file|
-    pn = Pathname(file)
-    key = pn.relative_path_from(Pathname(@backup_base_path))
+  all_files_to_backup.each do |pn|
+    begin
+      # pn is a fake Pathname from cached db
+      key = pn.file_key
+    rescue NoMethodError
+      # pn is a real Pathname, used to create cache
+      key = pn.relative_path_from(Pathname(@backup_base_path))
+    end
     if @backup_service.file_needs_upload?(pn, key.to_s)
       @backup_service.upload_file pn, key.to_s
     end
@@ -64,15 +69,13 @@ def all_files_to_backup
     cached_files = db.execute("select * from local_file_list")
     files = []
     cached_files.each do |row|
-      file_name = row[0]
-      files.push(file_name)
-      # row_data = {
-      #   file_name: row[0],
-      #   file_key: row[1]
-      #   last_modified: row[2],
-      #   size: row[3]
-      # }
-      # files.push(row_data)
+      row_data = {
+        to_s: row[0],
+        file_key: row[1],
+        mtime: Time.at(row[2]),
+        size: row[3]
+      }
+      files.push(OpenStruct.new(row_data))
     end
     @logger.info "Local files cached from #{@backup_folder}: #{cache_count}."
   else
@@ -95,7 +98,7 @@ def all_files_to_backup
     @logger.info "Inserting #{files.count} rows into #{LOCAL_FILE_CACHE}"
     files.each do |file|
       db.execute("INSERT INTO local_file_list (file_path, file_key, last_modified, size)
-                  VALUES (?, ?, ?, ?)", [file, Pathname(file).relative_path_from(Pathname(@backup_base_path)).to_s, Pathname(file).mtime.tv_sec, Pathname(file).size])
+                  VALUES (?, ?, ?, ?)", [file.to_s, file.relative_path_from(Pathname(@backup_base_path)).to_s, file.mtime.tv_sec, file.size])
     end
     @logger.info "#{files.count} rows inserted."
   end
