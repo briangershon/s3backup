@@ -27,7 +27,6 @@ class FilesForBackup
   end
 
   def remove_excludes(all_files, logger=nil)
-    logger.info "Excluding paths..." unless logger.nil?
     new_file_list = []
     all_files.each do |file|
       exclude = false

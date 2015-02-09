@@ -39,21 +39,12 @@ def run_backup_job(backup_job_s3_key, aws_bucket, aws_profile)
 
   @backup_service = BackupFileToS3.new(s3_client, @aws_bucket, s3_bucket_list, @logger)
 
-  @logger.info "Getting list of local files from #{@backup_folder}."
-  all_files_cache = Pathname("#{backup_job_s3_key}.cache.json")
-  if all_files_cache.exist?
-    @all_files = JSON.parse(all_files_cache.read)
-    @logger.info "Retrieved cached list of files from '#{all_files_cache}'."
-  else
-    @all_files = FilesForBackup.new(@backup_folder, @backup_folder_excludes).files(@logger)
-    all_files_cache.write(@all_files.to_json)
-    @logger.info "Cached list of files to '#{all_files_cache}'."
-  end
+  @logger.info "Creating list of local files from #{@backup_folder}."
+  @all_files = FilesForBackup.new(@backup_folder, @backup_folder_excludes).files(@logger)
   files_count = @all_files.count
-
   @logger.info "#{files_count} files found."
-  @logger.info "Backing up to S3://#{@aws_bucket}/#{@bucket_prefix}"
 
+  @logger.info "Backing up to S3://#{@aws_bucket}/#{@bucket_prefix}"
   @all_files.each_with_index do |file, index|
     pn = Pathname(file)
     if pn.file?
@@ -67,7 +58,6 @@ def run_backup_job(backup_job_s3_key, aws_bucket, aws_profile)
     end
   end
 
-  # all_files_cache.delete
   # @logger.info "Deleted '#{all_files_cache}'."
   # s3_bucket_list.remove_cache
 

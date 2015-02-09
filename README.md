@@ -6,8 +6,7 @@ A simple folder backup solution to AWS S3.
 * Central configuration - Job configuration is downloaded from S3 allowing easy
 changes from a central location instead of separate config files on each machine.
 
-* Metadata Cache - File metadata is cached locally to avoid hitting S3 for each
-file to check if it needs updating. Greatly speeds up subsequent runs.
+* S3 Cache - File metadata is cached initially to avoid hitting S3 for each file.
 
 Author: Brian Gershon
 
@@ -32,11 +31,6 @@ See [Setting up AWS Credentials](http://docs.aws.amazon.com/AWSSdkDocsRuby/lates
 
 `backup_job_s3_key` is the name (s3_key) of a YAML file in aws_bucket.
 See below for file format.
-
-Until a backup job fully completes, the list of files are cached in a local
-"`#{backup_job_s3_key}`.cache.json" to avoid slow rebuilding of this file for large
-directories. Just delete this file to rebuild the cache, otherwise it is
-automatically deleted when the backup completes.
 
 Job Configuration (YAML file)
 -----------------------------
