@@ -13,7 +13,7 @@ class S3BucketList
     if CACHE_DATABASE_PATH.exist?
       @db = SQLite3::Database.new CACHE_DATABASE_PATH.to_s
       cache_count = @db.execute("select count(*) from s3_bucket_list").first.first
-      @logger.info "#{cache_count} S3 files cached from s3://#{@aws_bucket_name}/#{@s3_bucket_list_object_prefix}"
+      @logger.info "Files cached from s3://#{@aws_bucket_name}/#{@s3_bucket_list_object_prefix}: #{cache_count}."
     else
       @logger.info "Building cache of remote S3 files from s3://#{@aws_bucket_name}/#{@s3_bucket_list_object_prefix}"
       all_s3_objects = list_objects

@@ -42,7 +42,7 @@ def run_backup_job(backup_job_s3_key, aws_bucket, aws_profile)
   @logger.info "Creating list of local files from #{@backup_folder}."
   @all_files = FilesForBackup.new(@backup_folder, @backup_folder_excludes).files(@logger)
   files_count = @all_files.count
-  @logger.info "#{files_count} files found."
+  @logger.info "#{files_count} local files found."
 
   @logger.info "Backing up to S3://#{@aws_bucket}/#{@bucket_prefix}"
   @all_files.each_with_index do |file, index|
@@ -58,8 +58,7 @@ def run_backup_job(backup_job_s3_key, aws_bucket, aws_profile)
     end
   end
 
-  # @logger.info "Deleted '#{all_files_cache}'."
-  # s3_bucket_list.remove_cache
+  s3_bucket_list.remove_cache
 
   @logger.info "Finished."
   @logger.close
