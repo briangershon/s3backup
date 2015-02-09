@@ -14,7 +14,16 @@ class FilesForBackup
       end
     end
 
-    all_files = remove_excludes(Find.find(@backup_folder).to_a, logger)
+    # exclude directories
+    find_files = Find.find(@backup_folder).to_a
+    files_only = []
+    find_files.each do |file|
+      if Pathname(file).file?
+        files_only.push(file)
+      end
+    end
+
+    remove_excludes(files_only, logger)
   end
 
   def remove_excludes(all_files, logger=nil)
